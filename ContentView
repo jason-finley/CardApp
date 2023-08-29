@@ -1,0 +1,677 @@
+//
+//  ContentView.swift
+//  Clash of Cards
+//
+//  Created by Jason Finley on 7/2/23.
+//
+
+import SwiftUI
+import PhotosUI
+
+
+struct ContentView: View {
+    var body: some View {
+        NavigationView {
+            ZStack {
+                // Background
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .background(Color(red: 0.345, green: 0.43, blue: 0.975))
+                    .cornerRadius(231)
+                    .blur(radius: 100)
+                    .offset(x:-228, y:-80)
+                
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .background(Color(red: 0.32, green: 0.45, blue: 0.7).opacity(0.7))
+                    .cornerRadius(231)
+                    .blur(radius: 100)
+                    .offset(x:-52, y:-80)
+                
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .background(Color(red: 1, green: 0.33, blue: 0.75).opacity(0.4))
+                    .cornerRadius(231)
+                    .blur(radius: 100)
+                    .offset(x:96, y:-24)
+                
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .background(Color(red: 0.23, green: 0.08, blue: 0.47))
+                    .cornerRadius(260.25601)
+                    .blur(radius: 100)
+                    .rotationEffect(Angle(degrees: -33.23))
+                    .offset(x:-240, y:25)
+                
+                
+                // Button
+                NavigationLink(destination: TeamNames(), label: {
+                    ZStack {
+                        Image("Button1")
+                        Text("PLAY").font(
+                            Font.custom("Poppins", size: 25)
+                                .weight(.semibold)
+                        )
+                        .foregroundColor(.white)
+                    }
+                }).offset(x:0, y:140)
+                
+                // Labels
+                Text("CLASH OF CARDS")
+                    .font(
+                        Font.custom("Poppins", size: 60)
+                            .weight(.bold)
+                    )
+                    .kerning(1.8)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.white)
+                    .offset(x:0, y:-100)
+                
+                Text("THE APP")
+                    .font(
+                        Font.custom("Poppins", size: 20)
+                            .weight(.semibold)
+                    )
+                    .kerning(0.6)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.white)
+                    .offset(x:0, y:-40)
+                
+                Text("PRESS PLAY!!!")
+                    .font(
+                        Font.custom("Poppins", size: 25)
+                            .weight(.semibold)
+                    )
+                    .kerning(0.6)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.white)
+                    .offset(x:0, y:80)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(red: 0.07, green: 0.04, blue: 0.17))
+        }
+    }
+}
+
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+            .previewInterfaceOrientation(.landscapeRight)
+    }
+}
+
+class TextFieldManager: ObservableObject {
+    let characterLimit = 15
+    @Published var userInput = "Enter Team Name" {
+        didSet {
+            if userInput.count > characterLimit {
+                userInput = String(userInput.prefix(characterLimit))
+            }
+        }
+    }
+}
+
+struct TeamNames: View {
+    @Environment(\.presentationMode) var presentationMode
+    
+    @State var selectedItems1: [PhotosPickerItem] = []
+    @State var selectedItems2: [PhotosPickerItem] = []
+    @State var data1: Data?
+    @State var data2: Data?
+    
+    @ObservedObject var textFieldManager1 = TextFieldManager()
+    @ObservedObject var textFieldManager2 = TextFieldManager()
+
+    
+    var body: some View {
+        ZStack {
+            Button(action: {presentationMode.wrappedValue.dismiss()}) {
+                Image("Back")
+                }.offset(x:-340, y:-130)
+            
+            VStack {
+                HStack{
+                    ZStack {
+                        PhotosPicker(
+                            selection: $selectedItems1,
+                            maxSelectionCount: 1,
+                            matching: .images
+                        ) {
+                            ZStack {
+                                if let data1 = data1, let uiimage1 = UIImage(data: data1) {
+                                    Image(uiImage: uiimage1)
+                                        .resizable()
+                                        .frame(width: 180, height: 180)
+                                        .clipShape(Circle())
+                                }
+                                
+                                ZStack {
+                                    Image("Avatar").resizable()
+                                        .frame(width: 180, height: 180)
+                                    Image("edit").resizable()
+                                        .frame(width: 40, height: 40)
+                                        .offset(x: 65, y:65)
+                                }
+                            }
+                        }
+                        .onChange(of: selectedItems1) { newValue1 in
+                            guard let item1 = selectedItems1.first else {
+                                return
+                            }
+                            item1.loadTransferable(type: Data.self) { result1 in switch result1 {
+                            case .success(let data1):
+                                if let data1 = data1 {
+                                    self.data1 = data1
+                                } else {
+                                    print("Data is nil")
+                                }
+                            case .failure(let failure):
+                                fatalError("\(failure)")
+                            }
+                            }
+                        }
+                        ZStack {
+                            TextField("Team 1", text: $textFieldManager1.userInput)
+                                .background(Color.gray.opacity(0.3).cornerRadius(10))
+                                .font(Font.custom("Poppins", size: 25)
+                                .weight(.semibold)
+                            )
+                            .foregroundColor(.white)
+                            .offset(y:125)
+                        }
+                    }
+                    .frame(width: 180, height: 180)
+                    
+                    Spacer().frame(width:130)
+                    
+                   
+                        ZStack {
+                            PhotosPicker(
+                                selection: $selectedItems2,
+                                maxSelectionCount: 1,
+                                matching: .images
+                            ) {
+                                ZStack {
+                                    if let data2 = data2, let uiimage2 = UIImage(data: data2) {
+                                        Image(uiImage: uiimage2)
+                                            .resizable()
+                                            .frame(width: 180, height: 180)
+                                            .clipShape(Circle())
+                                    }
+                                    ZStack {
+                                        Image("Avatar").resizable()
+                                            .frame(width: 180, height: 180)
+                                        Image("edit").resizable()
+                                            .frame(width: 40, height: 40)
+                                            .offset(x: 65, y:65)
+                                    }
+                                }
+                            }
+                            .onChange(of: selectedItems2) { newValue in
+                                guard let item = selectedItems2.first else {
+                                    return
+                                }
+                                item.loadTransferable(type: Data.self) { result in switch result {
+                                case .success(let data2):
+                                    if let data2 = data2 {
+                                        self.data2 = data2
+                                    } else {
+                                        print("Data is nil")
+                                    }
+                                case .failure(let failure):
+                                    fatalError("\(failure)")
+                                }
+                                }
+                            }
+                            ZStack {
+                                TextField("Team 2", text: $textFieldManager2.userInput)
+                                    .background(Color.gray.opacity(0.3).cornerRadius(10))
+                                    .font(Font.custom("Poppins", size: 25)
+                                    .weight(.semibold)
+                                )
+                                .foregroundColor(.white)
+                                .offset(y:125)
+                            }
+                        }
+                        .frame(width: 180, height: 180)
+                }
+                
+                Spacer().frame(height: 90)
+                
+                Button(action: {}, label: {
+                    NavigationLink(destination: GameView(data1: $data1, data2: $data2, textFieldManager1: $textFieldManager1.userInput, textFieldManager2: $textFieldManager2.userInput)){
+                        ZStack {
+                            Image("Button1")
+                            Text("START GAME").font(
+                                Font.custom("Poppins", size: 25)
+                                    .weight(.semibold)
+                            )
+                            .foregroundColor(.white)
+                            
+                        }
+                    }.navigationBarHidden(true)
+
+                }).offset(x:0, y:0)
+            }
+        }.navigationBarHidden(true)
+        .frame(width: 844, height: 390)
+        .background(
+            LinearGradient(
+                stops: [
+                    Gradient.Stop(color: Color(red: 0, green: 0, blue: 0.05), location: 0.00),
+                    Gradient.Stop(color: Color(red: 0.14, green: 0.07, blue: 0.31), location: 0.25),
+                    Gradient.Stop(color: Color(red: 0.08, green: 0.03, blue: 0.24), location: 0.85),
+                    Gradient.Stop(color: Color(red: 0.09, green: 0.02, blue: 0.2), location: 1.00),
+                    ],
+                startPoint: UnitPoint(x: 0.5, y: -0.11),
+                endPoint: UnitPoint(x: 0.5, y: 1)
+            )
+        )
+    }
+}
+
+
+struct GameView: View {
+    @Binding var data1: Data?
+    @Binding var data2: Data?
+    
+    @Binding var textFieldManager1: String
+    @Binding var textFieldManager2: String
+    
+    @State private var mindstr = "MindCards"
+    @State private var bodystr = "BodyCards"
+    @State private var spiritstr = "SpiritCards"
+    
+    @State var player1turn = true
+    
+    @State var mind1 = false
+    @State var mind2 = false
+    @State var body1 = false
+    @State var body2 = false
+    @State var spirit1 = false
+    @State var spirit2 = false
+    
+    var body: some View {
+        if mind1 && body1 && spirit1 {
+            WinView(teamPic: $data1, teamName: $textFieldManager1)
+        }
+        else if mind2 && body2 && spirit2 {
+            WinView(teamPic: $data2, teamName: $textFieldManager2)
+        }
+        else {
+            ZStack{
+                VStack {
+                    Text("It is \(player1turn ? textFieldManager1: textFieldManager2)'s Turn").font(Font.custom("Poppins", size: 25).weight(.bold)).kerning(0.6)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white)
+                    
+                    Text("Select a Category").font(Font.custom("Poppins", size: 25).weight(.bold)).kerning(0.6)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white)
+                    
+                    HStack {
+                        ZStack {
+                            NavigationLink(destination: CardView(level: $mindstr, achieved:  player1turn ? $mind1 : $mind2, player1turn: $player1turn), label: {
+                                ZStack {
+                                    Image("Level")
+                                        .resizable()
+                                        .frame(width: 230, height: 275)
+                                        .padding(5)
+                                    
+                                    Text("MIND")
+                                        .font(
+                                            Font.custom("Poppins", size: 35)
+                                                .weight(.bold)
+                                        )
+                                        .kerning(1.0)
+                                        .multilineTextAlignment(.center)
+                                        .foregroundColor(.white)
+                                        .offset(x:0, y:-103)
+                                }
+                            }).disabled(player1turn && mind1 || !player1turn && mind2)
+                        }
+                        
+                        ZStack {
+                            NavigationLink(destination: CardView(level: $bodystr, achieved: player1turn ? $body1 : $body2, player1turn: $player1turn), label: {
+                                ZStack {
+                                    Image("Level")
+                                        .resizable()
+                                        .frame(width: 230, height: 275)
+                                        .padding(5)
+                                    
+                                    Text("BODY")
+                                        .font(
+                                            Font.custom("Poppins", size: 35)
+                                                .weight(.bold)
+                                        )
+                                        .kerning(1.0)
+                                        .multilineTextAlignment(.center)
+                                        .foregroundColor(.white)
+                                        .offset(x:0, y:-103)
+                                }
+                            }).disabled(player1turn && body1 || !player1turn && body2)
+                            
+                        }
+                        
+                        ZStack {NavigationLink(destination: CardView(level: $spiritstr, achieved: player1turn ? $spirit1 : $spirit2, player1turn: $player1turn), label: {
+                            ZStack {
+                                Image("Level")
+                                    .resizable()
+                                    .frame(width: 230, height: 275)
+                                    .padding(5)
+                                
+                                Text("SPIRIT")
+                                    .font(
+                                        Font.custom("Poppins", size: 35)
+                                            .weight(.bold)
+                                    )
+                                    .kerning(1.0)
+                                    .multilineTextAlignment(.center)
+                                    .foregroundColor(.white)
+                                    .offset(x:0, y:-103)
+                            }
+                        }).disabled(player1turn && spirit1 || !player1turn && spirit2)
+                        }
+                    }
+                }
+                ZStack {
+                    if let data1 = data1, let uiimage1 = UIImage(data: data1) {
+                        Image(uiImage: uiimage1)
+                            .resizable()
+                            .frame(width: 70, height: 70)
+                            .clipShape(Circle())
+                            .opacity(mind1 ? 1 : 0)
+                    }
+                    ZStack {
+                        Image("Avatar").resizable()
+                            .frame(width: 70, height: 70)
+                            .opacity(mind1 ? 1 : 0)
+                    }
+                }.offset(x:-300, y:50)
+                
+                ZStack {
+                    if let data2 = data2, let uiimage2 = UIImage(data: data2) {
+                        Image(uiImage: uiimage2)
+                            .resizable()
+                            .frame(width: 70, height: 70)
+                            .clipShape(Circle())
+                            .opacity(mind2 ? 1 : 0)
+                    }
+                    ZStack {
+                        Image("Avatar").resizable()
+                            .frame(width: 70, height: 70)
+                            .opacity(mind2 ? 1 : 0)
+                    }
+                }.offset(x:-200, y:50)
+                
+                ZStack {
+                    if let data1 = data1, let uiimage1 = UIImage(data: data1) {
+                        Image(uiImage: uiimage1)
+                            .resizable()
+                            .frame(width: 70, height: 70)
+                            .clipShape(Circle())
+                            .opacity(body1 ? 1 : 0)
+                    }
+                    ZStack {
+                        Image("Avatar").resizable()
+                            .frame(width: 70, height: 70)
+                            .opacity(body1 ? 1 : 0)
+                    }
+                }.offset(x:-50, y:50)
+                
+                ZStack {
+                    if let data2 = data2, let uiimage2 = UIImage(data: data2) {
+                        Image(uiImage: uiimage2)
+                            .resizable()
+                            .frame(width: 70, height: 70)
+                            .clipShape(Circle())
+                            .opacity(body2 ? 1 : 0)
+                    }
+                    ZStack {
+                        Image("Avatar").resizable()
+                            .frame(width: 70, height: 70)
+                            .opacity(body2 ? 1 : 0)
+                    }
+                }.offset(x:50, y:50)
+                
+                ZStack {
+                    if let data1 = data1, let uiimage1 = UIImage(data: data1) {
+                        Image(uiImage: uiimage1)
+                            .resizable()
+                            .frame(width: 70, height: 70)
+                            .clipShape(Circle())
+                            .opacity(spirit1 ? 1 : 0)
+                    }
+                    ZStack {
+                        Image("Avatar").resizable()
+                            .frame(width: 70, height: 70)
+                            .opacity(spirit1 ? 1 : 0)
+                    }
+                }.offset(x:200, y:50)
+                
+                ZStack {
+                    if let data2 = data2, let uiimage2 = UIImage(data: data2) {
+                        Image(uiImage: uiimage2)
+                            .resizable()
+                            .frame(width: 70, height: 70)
+                            .clipShape(Circle())
+                            .opacity(spirit2 ? 1 : 0)
+                    }
+                    ZStack {
+                        Image("Avatar").resizable()
+                            .frame(width: 70, height: 70)
+                            .opacity(spirit2 ? 1 : 0)
+                    }
+                }.offset(x:300, y:50)
+                
+            }
+            .frame(width: 844, height: 390)
+            .background(
+                LinearGradient(
+                    stops: [
+                        Gradient.Stop(color: Color(red: 0, green: 0, blue: 0.05), location: 0.00),
+                        Gradient.Stop(color: Color(red: 0.14, green: 0.07, blue: 0.31), location: 0.25),
+                        Gradient.Stop(color: Color(red: 0.08, green: 0.03, blue: 0.24), location: 0.85),
+                        Gradient.Stop(color: Color(red: 0.09, green: 0.02, blue: 0.2), location: 1.00),
+                    ],
+                    startPoint: UnitPoint(x: 0.5, y: -0.11),
+                    endPoint: UnitPoint(x: 0.5, y: 1)
+                )
+            ).navigationBarHidden(true)
+        }
+    }
+}
+
+
+struct CardView: View {
+    func readfiles(level: String) -> (String, String, String, String, String) {
+        if let path = Bundle.main.path(forResource: level, ofType: "txt"){
+            do {
+                let data = try String(contentsOfFile: path,encoding: .utf8)
+                let myStrings = data.components(separatedBy: "~")
+                
+                let randomInt = Int.random(in: 1..<myStrings.count)
+                
+                let prompt = myStrings[randomInt].components(separatedBy: ";")
+                
+                return (prompt[0], prompt[1], prompt[2], prompt[3], prompt[4])
+            } catch {
+                let error = error.localizedDescription
+                return (error, error, error, error, error)
+            }
+        }
+        return ("The", "file", "was", "not", "found :(")
+    }
+    
+    @Environment(\.presentationMode) var presentationMode
+    @Binding var level: String
+    @Binding var achieved: Bool
+    @Binding var player1turn: Bool
+    
+    var body: some View {
+        let text = readfiles(level: level)
+        VStack {
+            ZStack {
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .frame(width: 600, height: 250)
+                    .background(.white)
+                    .cornerRadius(30)
+                
+                VStack(spacing: 9) {
+                    Text(text.0)
+                        .font(
+                            Font.custom("Poppins", size: 25)
+                                .weight(.bold)
+                        )
+                        .kerning(0.6)
+                    
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 600, height: 1)
+                        .background(Color(red: 0.63, green: 0.08, blue: 0.08))
+                    
+                    Text(text.1)
+                        .font(
+                            Font.custom("Poppins", size: 20)
+                                .weight(.semibold)
+                        )
+                        .kerning(0.6)
+                    
+                    
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 595, height: 1)
+                        .background(Color(red: 0.55, green: 0.55, blue: 0.91))
+                    
+                    Text(text.2)
+                        .font(
+                            Font.custom("Poppins", size: 20)
+                                .weight(.semibold)
+                        )
+                        .kerning(0.6)
+                    
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 595, height: 1)
+                        .background(Color(red: 0.55, green: 0.55, blue: 0.91))
+                    
+                    Text(text.3)
+                        .font(
+                            Font.custom("Poppins", size: 20)
+                                .weight(.semibold)
+                        )
+                        .kerning(0.6)
+                    
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 595, height: 1)
+                        .background(Color(red: 0.55, green: 0.55, blue: 0.91))
+                    
+                    Text(text.4.replacingOccurrences(of: "\n", with: "", options: NSString.CompareOptions.literal, range: nil))
+                        .font(
+                            Font.custom("Poppins", size: 20)
+                                .weight(.semibold)
+                        )
+                        .kerning(0.6)
+                    
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 595, height: 1)
+                        .background(Color(red: 0.55, green: 0.55, blue: 0.91))
+                }
+            }
+            HStack {
+                Button(action: {presentationMode.wrappedValue.dismiss()
+                    self.player1turn.toggle()
+                }) {
+                    ZStack {
+                        Image("Button1").resizable().frame(width: 250, height: 60)
+                        Text("FAIL").font(
+                            Font.custom("Poppins", size: 25)
+                                .weight(.semibold)
+                        )
+                        .foregroundColor(.white)
+                    }
+                }
+                
+                Spacer().frame(width:100)
+                
+                Button(action: {presentationMode.wrappedValue.dismiss()
+                    self.achieved.toggle()
+                    self.player1turn.toggle()
+                }) {
+                    ZStack {
+                        Image("Button1").resizable().frame(width: 250, height: 60)
+                        Text("PASS").font(
+                            Font.custom("Poppins", size: 25)
+                                .weight(.semibold)
+                        )
+                        .foregroundColor(.white)
+                    }
+                }
+                
+            }
+        }
+        .frame(width: 844, height: 390)
+        .navigationBarHidden(true)
+        .background(
+          LinearGradient(
+            stops: [
+              Gradient.Stop(color: Color(red: 0, green: 0, blue: 0.05), location: 0.00),
+              Gradient.Stop(color: Color(red: 0.14, green: 0.07, blue: 0.31), location: 0.25),
+              Gradient.Stop(color: Color(red: 0.08, green: 0.03, blue: 0.24), location: 0.85),
+              Gradient.Stop(color: Color(red: 0.09, green: 0.02, blue: 0.2), location: 1.00),
+            ],
+            startPoint: UnitPoint(x: 0.5, y: -0.11),
+            endPoint: UnitPoint(x: 0.5, y: 1)
+          )
+        )
+        
+        
+    }
+}
+
+
+
+
+struct WinView: View {
+    @Binding var teamPic : Data?
+    @Binding var teamName: String
+
+    var body: some View {
+        VStack{
+            ZStack {
+                if let teamPic = teamPic, let uiimage1 = UIImage(data: teamPic) {
+                    Image(uiImage: uiimage1)
+                        .resizable()
+                        .frame(width: 180, height: 180)
+                        .clipShape(Circle())
+                }
+                ZStack {
+                    Image("Avatar").resizable()
+                        .frame(width: 180, height: 180)
+                }
+            }
+            
+            Text("!!! \(teamName) is Winner !!!").font(Font.custom("Poppins", size: 35).weight(.bold)).kerning(0.6)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.white)
+        }
+        .frame(width: 844, height: 390)
+        .navigationBarHidden(true)
+        .background(
+            LinearGradient(
+                stops: [
+                    Gradient.Stop(color: Color(red: 0, green: 0, blue: 0.05), location: 0.00),
+                    Gradient.Stop(color: Color(red: 0.14, green: 0.07, blue: 0.31), location: 0.25),
+                    Gradient.Stop(color: Color(red: 0.08, green: 0.03, blue: 0.24), location: 0.85),
+                    Gradient.Stop(color: Color(red: 0.09, green: 0.02, blue: 0.2), location: 1.00),
+                ],
+                startPoint: UnitPoint(x: 0.5, y: -0.11),
+                endPoint: UnitPoint(x: 0.5, y: 1)
+            )
+        )
+    }
+}
