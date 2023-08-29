@@ -1,0 +1,17 @@
+//
+//  Clash_of_CardsApp.swift
+//  Clash of Cards
+//
+//  Created by Jason Finley on 7/2/23.
+//
+
+import SwiftUI
+
+@main
+struct Clash_of_CardsApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
