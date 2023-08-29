@@ -1,0 +1,3 @@
+Title;1This is;2a template card;3following a;4similar format
+~MindCard1;1This is da,ji;2a text;3asdf;4asdf file
+~MindCard2;1This is d;2a text;3asdf;4asdf file

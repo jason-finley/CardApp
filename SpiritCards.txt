@@ -1,0 +1,3 @@
+Title;1This is d;2a text;3asdf;4asdf file
+~SpiritCard1;1This is daertr3wq;2a text;3asdf;4asdf file
+~SpiritCard2;1This is d;2a text;3asdf;4asdf file
